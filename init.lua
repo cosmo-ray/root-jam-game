@@ -15,11 +15,12 @@ local T_COLOR = 0xffff10ff
 local RT_COLOR = 0x10ffffff
 
 local TRIANGLE_PIXS =
-"   #   " ..
-"  ###  " ..
-" ##### " ..
-"#######" ..
-"       "
+"         " ..
+"    #    " ..
+"   ###   " ..
+"  #####  " ..
+" ####### " ..
+"         "
 
 local BAR_BG_RECT = 0
 local BAR_FG_RECT = 1
@@ -127,24 +128,29 @@ function dsr_init(wid)
    local triangle_info = Entity.new_array(wid, "t_info")
    triangle_info.mapping = {}
    yeCreateInt(T_COLOR, triangle_info.mapping, "#")
-   ywSizeCreate(3, 3, triangle_info, 'pix_per_char')
-   ywSizeCreate(7, 5, triangle_info, 'size')
+   ywSizeCreate(2, 3, triangle_info, 'pix_per_char')
+   ywSizeCreate(9, 6, triangle_info, 'size')
    wid.all_tris = Entity.new_array()
 
    local rev_tri_info = Entity.new_array(wid, "rt_info")
    rev_tri_info.mapping = {}
    yeCreateInt(RT_COLOR, rev_tri_info.mapping, " ")
    ywSizeCreate(3, 3, rev_tri_info, 'pix_per_char')
-   ywSizeCreate(7, 5, rev_tri_info, 'size')
+   ywSizeCreate(9, 6, rev_tri_info, 'size')
 
    ywCanvasNewHeadacheImg(wid, 100, 100, Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "t_info"))
 
    ywCanvasNewHeadacheImg(wid, 130, 100, Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "rt_info"))
-   local big_0 = ywCanvasNewHeadacheImg(wid, 200, 100, Entity.new_string(TRIANGLE_PIXS),
+   local big_1 = ywCanvasNewHeadacheImg(wid, SCEEN_RIGHT + 20, 10,
+					Entity.new_string(TRIANGLE_PIXS),
 					yeGet(wid, "t_info"))
-   ywCanvasForceSizeXY(last, 200, 200)
+   ywCanvasForceSizeXY(big_1, 80, 100)
+   local big_0 = ywCanvasNewHeadacheImg(wid, SCEEN_RIGHT + 160, 10,
+					Entity.new_string(TRIANGLE_PIXS),
+					yeGet(wid, "rt_info"))
+   ywCanvasForceSizeXY(big_0, 60, 80)
 
    mk_timed_txt(wid, "test-txt", 300, 300, 50, "je test de mettre du txt !!!")
    return ret
