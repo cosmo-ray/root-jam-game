@@ -1,0 +1,50 @@
+{
+    "name": "depleted-square-root",
+    "window name" : "depleted-square-root",
+    "window size" : [1024, 600],
+    "starting widget": "main",
+    "main": {
+	"<type>": "container",
+	"entries" : [
+	    {"path" : "depleted-square-root.title", "size" : 20},
+	    {"path" : "depleted-square-root.main_menu"}
+	],
+	"current": 1,
+	"background" : "rgba: 255 255 255 255"
+    },
+    "title": {
+	"<type>": "text-screen",
+	"text": "IMG HERE",
+    },
+    "main_menu": {
+	"<type>": "menu",
+        "text-align": "center",
+	"background-stretch-height": 1,
+	"background" : "rgba: 255 255 255 255",
+	"entries" : [
+	    {
+		"text" : "New Game",
+		"next" : "depleted-square-root.go",
+		"action" : "menuMainWidNext"
+	    },
+	    {
+		"text" : "Full Screen",
+		"action" : "FullScreenOnOff"
+	    },
+	    {
+		"text" : "Quit",
+		"action" : "FinishGame"
+	    }
+
+	],
+    },
+    "go": {
+	"<type>": "depleted-square-root"
+    },
+    "init-scripts" : [
+	"init_dsr"
+    ],
+    "pre-load" : [
+	{ "file" : "init.lua", "type" : "lua" }
+    ]
+}
