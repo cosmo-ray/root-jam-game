@@ -14,11 +14,28 @@ local T_COLOR = 0xffff10ff
 
 local RT_COLOR = 0x10ffffff
 
+local TV_PIXS =
+"     *    " ..
+"**********" ..
+"*########*" ..
+"*########*" ..
+"*########*" ..
+"**********"
+
+
 local TRIANGLE_PIXS =
 "         " ..
 "    #    " ..
 "   ###   " ..
 "  #####  " ..
+" ####### " ..
+"         "
+
+local SQUARE_PIXS =
+"         " ..
+" ####### " ..
+" ####### " ..
+" ####### " ..
 " ####### " ..
 "         "
 
@@ -138,11 +155,24 @@ function dsr_init(wid)
    ywSizeCreate(3, 3, rev_tri_info, 'pix_per_char')
    ywSizeCreate(9, 6, rev_tri_info, 'size')
 
+   local ret_tri_wrong_info = Entity.new_copy(rev_tri_info, wid, "rt_w_info")
+   yeCreateIntAt(T_COLOR, ret_tri_wrong_info.mapping, " ", 0)
+
+   local tri_wrong_info = Entity.new_copy(triangle_info, wid, "t_w_info")
+   yeCreateIntAt(RT_COLOR, tri_wrong_info.mapping, "#", 0)
+
    ywCanvasNewHeadacheImg(wid, 100, 100, Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "t_info"))
 
    ywCanvasNewHeadacheImg(wid, 130, 100, Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "rt_info"))
+
+   ywCanvasNewHeadacheImg(wid, 100, 130, Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "rt_w_info"))
+
+   ywCanvasNewHeadacheImg(wid, 130, 130, Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "t_w_info"))
+
    local big_1 = ywCanvasNewHeadacheImg(wid, SCEEN_RIGHT + 20, 10,
 					Entity.new_string(TRIANGLE_PIXS),
 					yeGet(wid, "t_info"))
