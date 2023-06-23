@@ -6,9 +6,8 @@ local R_LIFE_POS_H = 30
 local WIN_W = 1024
 local WIN_H = 600
 
-local TRIANGLES_PART_X = WIN_W / 2 + WIN_W / 4
-
 local SCEEN_RIGHT = WIN_W / 2
+local SCREEN_NPCS_Y = 150
 
 local T_COLOR = 0xffff10ff
 
@@ -39,6 +38,9 @@ local SQUARE_PIXS =
 " ####### " ..
 "         "
 
+local TYPE_SQUARE = 0
+local TYPE_TRIANGLE = 1
+
 local BAR_BG_RECT = 0
 local BAR_FG_RECT = 1
 local BAR_X = 2
@@ -48,6 +50,59 @@ local BAR_H = 5
 local BAR_MAX = 6
 local BAR_CUR = 7
 local BAR_COLOR = 8
+
+local NPC_TYPE = 0
+local NPC_INVERSED = 1
+local NPC_GOOD_COL = 2
+local NPC_HAVE_CHANGE_INVERSE = 3
+
+local function mk_npc(wid, npc_type, in_out, good_color)
+   local ret = Entity.new_array(yeGet(wid, "npcs"))
+
+   ret[NPC_TYPE] = npc_type
+   ret[NPC_INVERSED] = in_out
+   ret[NPC_GOOD_COL] = good_color
+   ret[NPC_HAVE_CHANGE_INVERSE] = 0
+   return ret
+end
+
+function print_all_npc(wid)
+   local npcs = Entity.wrapp(yeGet(wid, "npcs"))
+   local npcs_printable = Entity.wrapp(yeGet(wid, "npcs_p"))
+   ywCanvasClearArray(npcs_printable)
+   local x = SCEEN_RIGHT + 5
+   local y = SCREEN_NPCS_Y + 5
+
+   for i = 0, yeLen(npcs) - 1 do
+      local n = npcs[i]
+      local pixs = TRIANGLE_PIXS
+      local info = nil
+
+      if n[NPC_TYPE] < TYPE_TRIANGLE then
+	 pixs = SQUARE_PIXS
+      end
+      if n[NPC_INVERSED] < 1 then
+	 if n[NPC_GOOD_COL] < 1 then
+	    info = "t_w_info"
+	 else
+	    info = "t_info"
+	 end
+      else
+	 if n[NPC_GOOD_COL] < 1 then
+	    info = "rt_w_info"
+	 else
+	    info = "rt_info"
+	 end
+      end
+      local co = ywCanvasNewHeadacheImg(wid, x, y, Entity.new_string(pixs), yeGet(wid, info))
+      x = x + 40
+      if x > WIN_W - 40 then
+	 x = SCEEN_RIGHT + 5
+	 y = y + 40
+      end
+      yePushBack(npcs_printable)
+   end
+end
 
 local function bar_cur(bar)
    return yeGetIntAt(bar, BAR_CUR)
@@ -113,6 +168,8 @@ local function bar_dec(wid, bar_name, to_sub)
       h - 6, bar[BAR_COLOR]:to_string())
 end
 
+
+
 function dsr_Action(wid, eves)
    wid = Entity.wrapp(wid)
    bar_dec(wid, "wolf-bar", 2)
@@ -124,6 +181,7 @@ function dsr_Action(wid, eves)
    if bar_cur(wid["=earth-hp-r"]) < 1 then
       return ygCallFuncOrQuit(wid, "die")
    end
+   print_all_npc(wid)
 end
 
 function dsr_init(wid)
@@ -136,8 +194,10 @@ function dsr_init(wid)
 
    local ret = ywidNewWidget(wid, "canvas")
    ywCanvasNewVSegment(wid, SCEEN_RIGHT, 0, 1000, "rgba: 0 0 0 255")
-   ywCanvasNewHSegment(wid, SCEEN_RIGHT, 150, WIN_W / 2, "rgba: 0 0 0 255")
-   ywCanvasNewVSegment(wid, TRIANGLES_PART_X, 150, WIN_H, "rgba: 0 0 100 255")
+   ywCanvasNewHSegment(wid, SCEEN_RIGHT, SCREEN_NPCS_Y, WIN_W / 2, "rgba: 0 0 0 255")
+
+   yeCreateArray(wid, "npcs")
+   yeCreateArray(wid, "npcs_p")
 
    mk_bar(wid, "rgba: 100 255 100 155", "=earth-hp-r", R_LIFE_POS_X, R_LIFE_POS_Y,
 	  R_LIFE_POS_W, R_LIFE_POS_H, 100)
@@ -160,6 +220,13 @@ function dsr_init(wid)
 
    local tri_wrong_info = Entity.new_copy(triangle_info, wid, "t_w_info")
    yeCreateIntAt(RT_COLOR, tri_wrong_info.mapping, "#", 0)
+
+   mk_npc(wid, TYPE_SQUARE, true, true)
+   mk_npc(wid, TYPE_SQUARE, true, false)
+   mk_npc(wid, TYPE_SQUARE, false, true)
+   mk_npc(wid, TYPE_SQUARE, false, false)
+   mk_npc(wid, TYPE_TRIANGLE, true, false)
+   mk_npc(wid, TYPE_TRIANGLE, true, true)
 
    ywCanvasNewHeadacheImg(wid, 100, 100, Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "t_info"))
