@@ -21,6 +21,8 @@ local TV_PIXS =
 "*########*" ..
 "**********"
 
+local tv_txt_x = 60
+local tv_txt_y = 140
 
 local TRIANGLE_PIXS =
 "         " ..
@@ -228,18 +230,6 @@ function dsr_init(wid)
    mk_npc(wid, TYPE_TRIANGLE, true, false)
    mk_npc(wid, TYPE_TRIANGLE, true, true)
 
-   ywCanvasNewHeadacheImg(wid, 100, 100, Entity.new_string(TRIANGLE_PIXS),
-			  yeGet(wid, "t_info"))
-
-   ywCanvasNewHeadacheImg(wid, 130, 100, Entity.new_string(TRIANGLE_PIXS),
-			  yeGet(wid, "rt_info"))
-
-   ywCanvasNewHeadacheImg(wid, 100, 130, Entity.new_string(TRIANGLE_PIXS),
-			  yeGet(wid, "rt_w_info"))
-
-   ywCanvasNewHeadacheImg(wid, 130, 130, Entity.new_string(TRIANGLE_PIXS),
-			  yeGet(wid, "t_w_info"))
-
    local big_1 = ywCanvasNewHeadacheImg(wid, SCEEN_RIGHT + 20, 10,
 					Entity.new_string(TRIANGLE_PIXS),
 					yeGet(wid, "t_info"))
@@ -249,7 +239,19 @@ function dsr_init(wid)
 					yeGet(wid, "rt_info"))
    ywCanvasForceSizeXY(big_0, 60, 80)
 
-   mk_timed_txt(wid, "test-txt", 300, 300, 50, "je test de mettre du txt !!!")
+   local tv_info = Entity.new_array(wid, "tv_info")
+   tv_info.mapping = {}
+   yeCreateInt(0x000000ff, tv_info.mapping, "*")
+   yeCreateInt(0x9999992f, tv_info.mapping, "#")
+   ywSizeCreate(2, 3, tv_info, 'pix_per_char')
+   ywSizeCreate(10, 6, tv_info, 'size')
+
+   local tv = ywCanvasNewHeadacheImg(wid, 30, 20,
+				     Entity.new_string(TV_PIXS),
+				     yeGet(wid, "tv_info"))
+   ywCanvasForceSizeXY(tv, 300, 300)
+
+   mk_timed_txt(wid, "test-txt", tv_txt_x, tv_txt_y, 50, "je test de mettre du txt !!!")
    return ret
 end
 
