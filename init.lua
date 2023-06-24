@@ -21,8 +21,10 @@ local TV_PIXS =
 "*########*" ..
 "**********"
 
-local tv_txt_x = 60
-local tv_txt_y = 140
+local TV_TXT_X = 60
+local TV_TXT_Y = 140
+
+local TV_BOTTOM = 330
 
 local TRIANGLE_PIXS =
 "         " ..
@@ -251,7 +253,36 @@ function dsr_init(wid)
 				     yeGet(wid, "tv_info"))
    ywCanvasForceSizeXY(tv, 300, 300)
 
-   mk_timed_txt(wid, "test-txt", tv_txt_x, tv_txt_y, 50, "je test de mettre du txt !!!")
+   mk_timed_txt(wid, "test-txt", TV_TXT_X, TV_TXT_Y, 50, "je test de mettre du txt !!!")
+
+   -- everyone info part
+   ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM,
+			  Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "t_info"))
+   mk_bar(wid, "rgba: 255 255 100 200", "t_hp", 65, TV_BOTTOM, 200, 22, 100)
+
+   ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 30,
+			  Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "rt_info"))
+   mk_bar(wid, "rgba: 255 255 100 200", "rt_hp", 65, TV_BOTTOM + 30, 200, 22, 100)
+
+   ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 60,
+			  Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "t_w_info"))
+   mk_bar(wid, "rgba: 255 255 100 200", "tw_hp", 65, TV_BOTTOM + 60, 200, 22, 100)
+
+   ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 90,
+			  Entity.new_string(TRIANGLE_PIXS),
+			  yeGet(wid, "rt_w_info"))
+   mk_bar(wid, "rgba: 255 255 100 200", "rtw_hp", 65, TV_BOTTOM + 90, 200, 22, 100)
+
+   ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 120,
+			  Entity.new_string(SQUARE_PIXS),
+			  yeGet(wid, "t_info"))
+   mk_bar(wid, "rgba: 255 255 100 200", "s_hp", 65, TV_BOTTOM + 120, 200, 22, 100)
+
+   ywCanvasNewTextByStr(wid, 30, TV_BOTTOM + 150, "<->")
+   mk_bar(wid, "rgba: 255 255 100 200", "c_hp", 65, TV_BOTTOM + 150, 200, 22, 100)
    return ret
 end
 
