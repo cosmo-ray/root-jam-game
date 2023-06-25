@@ -73,11 +73,12 @@ end
 function print_all_npc(wid)
    local npcs = Entity.wrapp(yeGet(wid, "npcs"))
    local npcs_printable = Entity.wrapp(yeGet(wid, "npcs_p"))
-   ywCanvasClearArray(npcs_printable)
+   ywCanvasClearArray(wid, npcs_printable)
    local x = SCEEN_RIGHT + 5
    local y = SCREEN_NPCS_Y + 5
+   local npcs_len = yeLen(npcs)
 
-   for i = 0, yeLen(npcs) - 1 do
+   for i = 0, npcs_len - 1 do
       local n = npcs[i]
       local pixs = TRIANGLE_PIXS
       local info = nil
@@ -104,7 +105,7 @@ function print_all_npc(wid)
 	 x = SCEEN_RIGHT + 5
 	 y = y + 40
       end
-      yePushBack(npcs_printable)
+      yePushBack(npcs_printable, co)
    end
 end
 
@@ -163,34 +164,80 @@ local function bar_dec(wid, bar_name, to_sub)
    local cur = bar[BAR_CUR]:to_int()
 
    cur = cur - to_sub
-   bar[BAR_CUR] = cur
+   if cur > max then
+      bar[BAR_CUR] = max
+   elseif cur < 0 then
+      bar[BAR_CUR] = 0
+   else
+      bar[BAR_CUR] = cur
+   end
 
    ywCanvasRemoveObj(wid, bar[BAR_FG_RECT])
    bar[BAR_FG_RECT] = ywCanvasNewRectangle(
       wid, x + 3, y + 3,
-      w * cur / max,
+      (w - 6) * cur / max,
       h - 6, bar[BAR_COLOR]:to_string())
 end
 
+local turn_consumer_txt_cnt = 0
+local score = 0
+
+local function show_consumption(wid, who, howmuch)
+   ycoRepushObj(
+      wid, who,
+      ywCanvasNewTextByStr(wid, 20 + yAnd(turn_consumer_txt_cnt, 1) * 240,
+			   WIN_H - 100 + (math.floor(turn_consumer_txt_cnt / 2) * 15),
+			   who .. " consume " .. howmuch))
+   bar_dec(wid, "=earth-hp-r", howmuch)
+
+   turn_consumer_txt_cnt = turn_consumer_txt_cnt + 1
+
+end
 
 
 function dsr_Action(wid, eves)
    wid = Entity.wrapp(wid)
+
    bar_dec(wid, "wolf-bar", 2)
-   bar_dec(wid, "=earth-hp-r", 1)
+
+   ycoRepushObj(
+      wid, "my-score",
+      ywCanvasNewTextByStr(wid, SCEEN_RIGHT + 300, 10, "score: " .. score))
+
+   ycoRepushObj(
+      wid, "heal-hp-earth",
+      ywCanvasNewTextByStr(wid, 300, WIN_H - 40, "square root heal " .. -13))
+
+   local big_consume = 4
+   local small_triangle_consume = 3
+   local small_i_triangle_consume = 3
+   local square_consume = 2
+
+   turn_consumer_txt_cnt = 0
+   show_consumption(wid, "BIG ONES", big_consume)
+   show_consumption(wid, "plain triangle", small_triangle_consume)
+   show_consumption(wid, "invers triangle", small_i_triangle_consume)
+   show_consumption(wid, "all squares", square_consume)
+
+   bar_dec(wid, "=earth-hp-r", -13)
+
    timed_txt_dec(wid, "test-txt", 1)
+
    if yevIsKeyDown(eves, Y_Q_KEY) == true then
       return ygCallFuncOrQuit(wid, "quit")
    end
    if bar_cur(wid["=earth-hp-r"]) < 1 then
       return ygCallFuncOrQuit(wid, "die")
    end
+
+   score = score + big_consume
    print_all_npc(wid)
 end
 
 function dsr_init(wid)
    wid = Entity.wrapp(wid)
    print("DSR INIT !")
+   score = 0
 
    wid.background = "rgba: 255 255 255 255"
    wid.action = Entity.new_func(dsr_Action)
@@ -225,12 +272,23 @@ function dsr_init(wid)
    local tri_wrong_info = Entity.new_copy(triangle_info, wid, "t_w_info")
    yeCreateIntAt(RT_COLOR, tri_wrong_info.mapping, "#", 0)
 
-   mk_npc(wid, TYPE_SQUARE, true, true)
-   mk_npc(wid, TYPE_SQUARE, true, false)
-   mk_npc(wid, TYPE_SQUARE, false, true)
-   mk_npc(wid, TYPE_SQUARE, false, false)
-   mk_npc(wid, TYPE_TRIANGLE, true, false)
-   mk_npc(wid, TYPE_TRIANGLE, true, true)
+   for i = 0, 131 do
+      local rand = yuiRand() % 100
+
+      if rand < 8 then
+	 mk_npc(wid, TYPE_SQUARE, false, true)
+      else
+	 local in_out = false
+	 local goodcol = true
+	 if rand % 2 == 0 then
+	    in_out = true
+	 end
+	 if rand > 90 then
+	    goodcol = false
+	 end
+	 mk_npc(wid, TYPE_TRIANGLE, in_out, goodcol)
+      end
+   end
 
    local big_1 = ywCanvasNewHeadacheImg(wid, SCEEN_RIGHT + 20, 10,
 					Entity.new_string(TRIANGLE_PIXS),
