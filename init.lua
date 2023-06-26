@@ -143,11 +143,14 @@ local function timed_txt_dec(wid, name, nb)
    end
 end
 
-local function mk_timed_txt(wid, name, x, y, timer, txt)
+local function mk_timed_txt(wid, name, x, y, timer, txt, color)
    Entity.wrapp(wid)[name] = nil
    local ret = Entity.new_array(wid, name)
 
    ret[TIMED_TXT_CANVASOBJ] = ywCanvasNewTextByStr(wid, x, y, txt)
+   if yIsNNil(color) then
+      ywCanvasSetStrColor(ret[TIMED_TXT_CANVASOBJ], color)
+   end
    ret[TIMED_TXT_TIME] = timer
    return ret
 end
@@ -221,8 +224,13 @@ function dsr_Action(wid, eves)
       print("NEW ACTION")
       if turn_cnt > 30 then
       elseif turn_cnt == 15 then
-	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15, "Big strike against, THE BIG !!!")
-	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 15, "peoples are\nangry against us")
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15,
+		      "NEW LAW\ndecrase SR access to triangles"..
+		      "\nReaction:\nBig strike against, THE BIG !!!")
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 15, "peoples are\nangry against us\ndmg deal: " .. 25, "rgba: 255 0 0 255")
+	 small_triangle_consume = 3
+	 small_i_triangle_consume = 3
+	 bar_dec(wid, "wolf-bar", 25)
       end
    end
    turn_cnt = turn_cnt + 1
@@ -233,11 +241,6 @@ function dsr_Action(wid, eves)
    ycoRepushObj(
       wid, "heal-hp-earth",
       ywCanvasNewTextByStr(wid, 300, WIN_H - 40, "square root heal " .. -13))
-
-   local big_consume = 4
-   local small_triangle_consume = 3
-   local small_i_triangle_consume = 3
-   local square_consume = 2
 
    turn_consumer_txt_cnt = 0
    show_consumption(wid, "BIG ONES", big_consume)
@@ -266,7 +269,13 @@ end
 function dsr_init(wid)
    wid = Entity.wrapp(wid)
    print("DSR INIT !")
+
+   -- INIT GLOBALS
    score = 0
+   big_consume = 4
+   small_triangle_consume = 4
+   small_i_triangle_consume = 4
+   square_consume = 2
 
    wid.background = "rgba: 255 255 255 255"
    wid.action = Entity.new_func(dsr_Action)
@@ -281,7 +290,7 @@ function dsr_init(wid)
 
    mk_bar(wid, "rgba: 100 255 100 155", "=earth-hp-r", R_LIFE_POS_X, R_LIFE_POS_Y,
 	  R_LIFE_POS_W, R_LIFE_POS_H, 100)
-   mk_bar(wid, "rgba: 100 255 200 155", "wolf-bar", SCEEN_RIGHT + 30, 110, 300, 20, 250)
+   mk_bar(wid, "rgba: 100 255 200 155", "wolf-bar", SCEEN_RIGHT + 30, 110, 300, 20, 300)
    local triangle_info = Entity.new_array(wid, "t_info")
    triangle_info.mapping = {}
    yeCreateInt(T_COLOR, triangle_info.mapping, "#")
