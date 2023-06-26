@@ -61,11 +61,26 @@ local NPC_GOOD_COL = 2
 local NPC_HAVE_CHANGE_INVERSE = 3
 
 local menu_resultat = 0
-local menu_is_on = 1
+local menu_is_on = false
+local menu_options = nil
+local menu_txt_objs = {}
+
+local function handle_menu(wid, eves)
+   print("handle menus", menu_options)
+end
 
 local function mk_menu(wid, options)
+   menu_is_on = true
+   menu_rectangle_bg = ywCanvasNewRectangle(wid, 20, 20, 200, 20 * #options + 10,
+				       "rgba: 120 120 120 200")
+   menu_rectangle_txts_bg = ywCanvasNewRectangle(wid, 25, 25, 190, 20 * #options,
+					   "rgba: 255 255 255 200")
+   menu_rectangle_cur = ywCanvasNewRectangle(wid, 25, 25, 190, 20,
+					   "rgba: 200 200 200 200")
+   menu_options = options
    for i,v in ipairs(options) do
       print(i, v)
+      menu_txt_objs[i] = ywCanvasNewTextByStr(wid, 26, 26 + (i - 1) * 20, v)
    end
 end
 
@@ -218,19 +233,28 @@ function dsr_Action(wid, eves)
 
    -- bar_dec(wid, "wolf-bar", 2)
 
+   if menu_is_on == true then
+      return handle_menu(wid, eves)
+   end
    timed_txt_dec(wid, "tv-txt", 1)
    timed_txt_dec(wid, "dmg-txt", 1)
    if turn_cnt % 15 == 0 then
       print("NEW ACTION")
       if turn_cnt > 30 then
+	 mk_menu(wid, {"test", "test 2"})
       elseif turn_cnt == 15 then
-	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15,
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
 		      "NEW LAW\ndecrase SR access to triangles"..
 		      "\nReaction:\nBig strike against, THE BIG !!!")
-	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 15, "peoples are\nangry against us\ndmg deal: " .. 25, "rgba: 255 0 0 255")
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 14, "peoples are\nangry against us\ndmg deal: " .. 25, "rgba: 255 0 0 255")
 	 small_triangle_consume = 3
 	 small_i_triangle_consume = 3
 	 bar_dec(wid, "wolf-bar", 25)
+      elseif turn_cnt == 30 then
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
+		      "new big strike against\nTHE BIG !!!")
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 14, "peoples are\nangry against us\ndmg deal: " .. 13, "rgba: 255 0 0 255")
+	 bar_dec(wid, "wolf-bar", 13)
       end
    end
    turn_cnt = turn_cnt + 1
