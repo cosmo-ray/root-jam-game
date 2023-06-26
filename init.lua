@@ -60,6 +60,15 @@ local NPC_INVERSED = 1
 local NPC_GOOD_COL = 2
 local NPC_HAVE_CHANGE_INVERSE = 3
 
+local menu_resultat = 0
+local menu_is_on = 1
+
+local function mk_menu(wid, options)
+   for i,v in ipairs(options) do
+      print(i, v)
+   end
+end
+
 local function mk_npc(wid, npc_type, in_out, good_color)
    local ret = Entity.new_array(yeGet(wid, "npcs"))
 
@@ -118,6 +127,9 @@ local TIMED_TXT_TIME = 1
 
 local function timed_txt_dec(wid, name, nb)
    local tt = Entity.wrapp(wid)[name]
+   if yIsNil(tt) then
+      return
+   end
    local t = tt[TIMED_TXT_TIME]:to_int()
 
    t = t - nb
@@ -132,6 +144,7 @@ local function timed_txt_dec(wid, name, nb)
 end
 
 local function mk_timed_txt(wid, name, x, y, timer, txt)
+   Entity.wrapp(wid)[name] = nil
    local ret = Entity.new_array(wid, name)
 
    ret[TIMED_TXT_CANVASOBJ] = ywCanvasNewTextByStr(wid, x, y, txt)
@@ -202,8 +215,15 @@ function dsr_Action(wid, eves)
 
    -- bar_dec(wid, "wolf-bar", 2)
 
+   timed_txt_dec(wid, "tv-txt", 1)
+   timed_txt_dec(wid, "dmg-txt", 1)
    if turn_cnt % 15 == 0 then
       print("NEW ACTION")
+      if turn_cnt > 30 then
+      elseif turn_cnt == 15 then
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15, "Big strike against, THE BIG !!!")
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 15, "peoples are\nangry against us")
+      end
    end
    turn_cnt = turn_cnt + 1
    ycoRepushObj(
@@ -226,8 +246,6 @@ function dsr_Action(wid, eves)
    show_consumption(wid, "all squares", square_consume)
 
    bar_dec(wid, "=earth-hp-r", -13)
-
-   timed_txt_dec(wid, "test-txt", 1)
 
    if yevIsKeyDown(eves, Y_Q_KEY) == true then
       return ygCallFuncOrQuit(wid, "quit")
@@ -322,7 +340,7 @@ function dsr_init(wid)
 				     yeGet(wid, "tv_info"))
    ywCanvasForceSizeXY(tv, 300, 300)
 
-   mk_timed_txt(wid, "test-txt", TV_TXT_X, TV_TXT_Y, 15, "The News today oh boy !!!")
+   mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15, "The News today oh boy !!!")
 
    -- everyone info part
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM,
