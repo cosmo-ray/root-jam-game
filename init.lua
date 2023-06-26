@@ -195,11 +195,17 @@ local function show_consumption(wid, who, howmuch)
 end
 
 
+local turn_cnt = 0
+
 function dsr_Action(wid, eves)
    wid = Entity.wrapp(wid)
 
-   bar_dec(wid, "wolf-bar", 2)
+   -- bar_dec(wid, "wolf-bar", 2)
 
+   if turn_cnt % 15 == 0 then
+      print("NEW ACTION")
+   end
+   turn_cnt = turn_cnt + 1
    ycoRepushObj(
       wid, "my-score",
       ywCanvasNewTextByStr(wid, SCEEN_RIGHT + 300, 10, "score: " .. score))
@@ -226,6 +232,11 @@ function dsr_Action(wid, eves)
    if yevIsKeyDown(eves, Y_Q_KEY) == true then
       return ygCallFuncOrQuit(wid, "quit")
    end
+   if bar_cur(yeGet(wid, "wolf-bar")) < 1 then
+      print("YOU LOSE !")
+      return ygCallFuncOrQuit(wid, "die")
+   end
+
    if bar_cur(wid["=earth-hp-r"]) < 1 then
       return ygCallFuncOrQuit(wid, "die")
    end
@@ -311,7 +322,7 @@ function dsr_init(wid)
 				     yeGet(wid, "tv_info"))
    ywCanvasForceSizeXY(tv, 300, 300)
 
-   mk_timed_txt(wid, "test-txt", TV_TXT_X, TV_TXT_Y, 50, "je test de mettre du txt !!!")
+   mk_timed_txt(wid, "test-txt", TV_TXT_X, TV_TXT_Y, 15, "The News today oh boy !!!")
 
    -- everyone info part
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM,
