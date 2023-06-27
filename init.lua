@@ -65,12 +65,38 @@ local menu_is_on = false
 local menu_options = nil
 local menu_txt_objs = {}
 
+
 local function handle_menu(wid, eves)
-   print("handle menus", menu_options)
+   if yevIsKeyDown(eves, Y_UP_KEY) == true then
+      menu_resultat = menu_resultat - 1
+      if menu_resultat < 0 then
+	 menu_resultat = #menu_options - 1
+      end
+      ywCanvasObjSetPos(menu_rectangle_cur, 25, 25 + menu_resultat * 20)
+   elseif yevIsKeyDown(eves, Y_DOWN_KEY) == true then
+      menu_resultat = menu_resultat + 1
+      if menu_resultat > #menu_options - 1 then
+	 menu_resultat = 0
+      end
+      ywCanvasObjSetPos(menu_rectangle_cur, 25, 25 + menu_resultat * 20)
+   elseif yevIsKeyDown(eves, Y_ENTER_KEY) == true then
+      ywCanvasRemoveObj(wid, menu_rectangle_bg)
+      ywCanvasRemoveObj(wid, menu_rectangle_txts_bg)
+      ywCanvasRemoveObj(wid, menu_rectangle_cur)
+      for i,v in ipairs(menu_txt_objs) do
+	 ywCanvasRemoveObj(wid, v)
+      end
+      menu_txt_objs = {}
+      menu_is_on = false
+      return true
+   end
+   return false
 end
 
 local function mk_menu(wid, options)
    menu_is_on = true
+   menu_resultat = 0
+   menu_txt_objs = {}
    menu_rectangle_bg = ywCanvasNewRectangle(wid, 20, 20, 200, 20 * #options + 10,
 				       "rgba: 120 120 120 200")
    menu_rectangle_txts_bg = ywCanvasNewRectangle(wid, 25, 25, 190, 20 * #options,
@@ -241,6 +267,7 @@ function dsr_Action(wid, eves)
    if turn_cnt % 15 == 0 then
       print("NEW ACTION")
       if turn_cnt > 30 then
+	 turn_cnt = turn_cnt + 1
 	 mk_menu(wid, {"test", "test 2"})
       elseif turn_cnt == 15 then
 	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
