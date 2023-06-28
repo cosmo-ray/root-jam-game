@@ -88,6 +88,7 @@ local menu_is_on = false
 local menu_options = nil
 local menu_txt_objs = {}
 
+local last_agresor = 0
 
 local function handle_menu(wid, eves)
    if yevIsKeyDown(eves, Y_UP_KEY) == true then
@@ -120,11 +121,11 @@ local function mk_menu(wid, options)
    menu_is_on = true
    menu_resultat = 0
    menu_txt_objs = {}
-   menu_rectangle_bg = ywCanvasNewRectangle(wid, 20, 20, 200, 20 * #options + 10,
+   menu_rectangle_bg = ywCanvasNewRectangle(wid, 20, 20, 500, 20 * #options + 10,
 				       "rgba: 120 120 120 200")
-   menu_rectangle_txts_bg = ywCanvasNewRectangle(wid, 25, 25, 190, 20 * #options,
+   menu_rectangle_txts_bg = ywCanvasNewRectangle(wid, 25, 25, 490, 20 * #options,
 					   "rgba: 255 255 255 200")
-   menu_rectangle_cur = ywCanvasNewRectangle(wid, 25, 25, 190, 20,
+   menu_rectangle_cur = ywCanvasNewRectangle(wid, 25, 25, 490, 20,
 					   "rgba: 200 200 200 200")
    menu_options = options
    for i,v in ipairs(options) do
@@ -298,7 +299,13 @@ function dsr_Action(wid, eves)
    -- bar_dec(wid, "wolf-bar", 2)
 
    if menu_is_on == true then
-      return handle_menu(wid, eves)
+      ret = handle_menu(wid, eves)
+      if ret then
+	 timed_txt_dec(wid, "tv-txt", 1)
+	 timed_txt_dec(wid, "dmg-txt", 1)
+      else
+	 return
+      end
    end
    timed_txt_dec(wid, "tv-txt", 1)
    timed_txt_dec(wid, "dmg-txt", 1)
@@ -306,7 +313,7 @@ function dsr_Action(wid, eves)
       print("NEW ACTION")
       if turn_cnt > 30 then
 	 turn_cnt = turn_cnt + 1
-	 mk_menu(wid, {"test", "test 2"})
+	 mk_menu(wid, {"try to reduce BIG hatred", "reuse last events: present " .. hate_idx_to_string(last_agresor) .. " as dangerous for socity"})
       elseif turn_cnt == 15 then
 	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
 		      "NEW LAW\ndecrase SR access to triangles"..
@@ -324,11 +331,12 @@ function dsr_Action(wid, eves)
 	 local hate_atk = "an " .. hate_idx_to_string(src) .. "attack\nan" .. hate_idx_to_string(target) .. "\nout of pure hate"
 	 local deal_txt = hate_idx_to_string(target) .. "recive 4 dmg"
 
-	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15,
 		      "new big strike against\nTHE BIG !!!\n".. hate_atk)
-	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 14, "peoples are\nangry against us\ndmg deal: " .. 13 .. "\n" .. deal_txt, "rgba: 255 0 0 255")
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 15, "peoples are\nangry against us\ndmg deal: " .. 13 .. "\n" .. deal_txt, "rgba: 255 0 0 255")
 	 bar_dec(wid, "wolf-bar", 13)
 	 bar_dec_from_hateidx(wid, target, 4)
+	 last_agresor = src
       end
    end
    turn_cnt = turn_cnt + 1
