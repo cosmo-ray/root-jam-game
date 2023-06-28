@@ -45,6 +45,29 @@ local SQUARE_PIXS =
 local TYPE_SQUARE = 0
 local TYPE_TRIANGLE = 1
 
+local TRIANGLE_HATE = 1
+local R_TRIANGLE_HATE = 2
+local TRIANGLE_W_HATE = 3
+local R_TRIANGLE_W_HATE = 4
+local SQUARE_HATE = 5
+local BIG_HATE = 6
+
+local function hate_idx_to_string(hate_idx)
+   if hate_idx == TRIANGLE_HATE then
+      return "triangle"
+   elseif hate_idx == R_TRIANGLE_HATE then
+      return "inv tri"
+   elseif hate_idx == TRIANGLE_W_HATE then
+      return "wrongly col"
+   elseif hate_idx == R_TRIANGLE_W_HATE then
+      return "invert wrong"
+   elseif hate_idx == SQUARE_HATE then
+      return "square"
+   elseif hate_idx == BIG_HATE then
+      return "THE BIG"
+   end
+end
+
 local BAR_BG_RECT = 0
 local BAR_FG_RECT = 1
 local BAR_X = 2
@@ -236,6 +259,22 @@ local function bar_dec(wid, bar_name, to_sub)
       h - 6, bar[BAR_COLOR]:to_string())
 end
 
+local function bar_dec_from_hateidx(wid, hate_idx, nb)
+   if hate_idx == TRIANGLE_HATE then
+      return bar_dec(wid, "t_hp", nb)
+   elseif hate_idx == R_TRIANGLE_HATE then
+      return bar_dec(wid, "rt_hp", nb)
+   elseif hate_idx == TRIANGLE_W_HATE then
+      return bar_dec(wid, "tw_hp", nb)
+   elseif hate_idx == R_TRIANGLE_W_HATE then
+      return bar_dec(wid, "rtw_hp", nb)
+   elseif hate_idx == SQUARE_HATE then
+      return bar_dec(wid, "s_hp", nb)
+   elseif hate_idx == BIG_HATE then
+      return bar_dec(wid, "wolf-bar", nb)
+   end
+end
+
 local turn_consumer_txt_cnt = 0
 local score = 0
 
@@ -250,7 +289,6 @@ local function show_consumption(wid, who, howmuch)
    turn_consumer_txt_cnt = turn_consumer_txt_cnt + 1
 
 end
-
 
 local turn_cnt = 0
 
@@ -278,10 +316,19 @@ function dsr_Action(wid, eves)
 	 small_i_triangle_consume = 3
 	 bar_dec(wid, "wolf-bar", 25)
       elseif turn_cnt == 30 then
+	 local target = yuiRand() % 4 + R_TRIANGLE_HATE
+	 local src = yuiRand() % 5 + 1
+	 while src == target do
+	    src = yuiRand() % 5 + 1
+	 end
+	 local hate_atk = "an " .. hate_idx_to_string(src) .. "attack\nan" .. hate_idx_to_string(target) .. "\nout of pure hate"
+	 local deal_txt = hate_idx_to_string(target) .. "recive 4 dmg"
+
 	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
-		      "new big strike against\nTHE BIG !!!")
-	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 14, "peoples are\nangry against us\ndmg deal: " .. 13, "rgba: 255 0 0 255")
+		      "new big strike against\nTHE BIG !!!\n".. hate_atk)
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 300, TV_TXT_Y, 14, "peoples are\nangry against us\ndmg deal: " .. 13 .. "\n" .. deal_txt, "rgba: 255 0 0 255")
 	 bar_dec(wid, "wolf-bar", 13)
+	 bar_dec_from_hateidx(wid, target, 4)
       end
    end
    turn_cnt = turn_cnt + 1
@@ -327,6 +374,7 @@ function dsr_init(wid)
    small_triangle_consume = 4
    small_i_triangle_consume = 4
    square_consume = 2
+   hates_array = {0, 5, 7, 4, 10, 25}
 
    wid.background = "rgba: 255 255 255 255"
    wid.action = Entity.new_func(dsr_Action)
@@ -428,8 +476,8 @@ function dsr_init(wid)
 			  yeGet(wid, "t_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "s_hp", 65, TV_BOTTOM + 120, 200, 22, 100)
 
-   ywCanvasNewTextByStr(wid, 30, TV_BOTTOM + 150, "<->")
-   mk_bar(wid, "rgba: 255 255 100 200", "c_hp", 65, TV_BOTTOM + 150, 200, 22, 100)
+   --ywCanvasNewTextByStr(wid, 30, TV_BOTTOM + 150, "<->")
+   --mk_bar(wid, "rgba: 255 255 100 200", "c_hp", 65, TV_BOTTOM + 150, 200, 22, 100)
    return ret
 end
 
