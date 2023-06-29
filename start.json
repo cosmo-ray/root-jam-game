@@ -45,6 +45,7 @@
 	"init_dsr"
     ],
     "pre-load" : [
-	{ "file" : "init.lua", "type" : "lua" }
+	{ "file" : "init.lua", "type" : "lua" },
+	{ "path" : "YIRL_MODULES_PATH/stop-screen", "type" : "module"}
     ]
 }

@@ -42,7 +42,9 @@ local SQUARE_PIXS =
 " ####### " ..
 "         "
 
+
 local TYPE_SQUARE = 0
+
 local TYPE_TRIANGLE = 1
 
 local TRIANGLE_HATE = 1
@@ -66,6 +68,12 @@ local function hate_idx_to_string(hate_idx)
    elseif hate_idx == BIG_HATE then
       return "THE BIG"
    end
+end
+
+local function compute_total_hate()
+   return hates_array[TRIANGLE_HATE] + hates_array[R_TRIANGLE_HATE]
+      + hates_array[TRIANGLE_W_HATE] + hates_array[R_TRIANGLE_W_HATE]
+      + hates_array[SQUARE_HATE] + hates_array[BIG_HATE]
 end
 
 local BAR_BG_RECT = 0
@@ -297,12 +305,81 @@ function dsr_Action(wid, eves)
    wid = Entity.wrapp(wid)
 
    -- bar_dec(wid, "wolf-bar", 2)
-
    if menu_is_on == true then
       ret = handle_menu(wid, eves)
       if ret then
 	 timed_txt_dec(wid, "tv-txt", 1)
 	 timed_txt_dec(wid, "dmg-txt", 1)
+
+	 local end_tv_txt = ""
+	 local end_info_txt = ""
+	 print("menu_resultat: ", menu_resultat)
+	 timed_txt_dec(wid, "tv-txt", 1)
+	 timed_txt_dec(wid, "dmg-txt", 1)
+	 if menu_resultat == 0 then
+	    local sucess = (yAnd(yuiRand(), 3) == 3)
+	    local nb = 1 + (yuiRand() % 8)
+	    print("sucess: ", sucess)
+	    end_tv_txt = "TV show about a BIG\n"..
+	       "suffering from not been accepted\n" ..
+	       "by other because he's too big"
+	    if sucess == false then
+	       hates_array[BIG_HATE] = hates_array[BIG_HATE] - nb
+	       end_info_txt = "TV show piss peoples:\nhate increase: " .. nb
+	    else
+	       hates_array[BIG_HATE] = hates_array[BIG_HATE] + nb
+	       end_info_txt = "more empathi troward us:\nhate reduce: " .. nb
+	    end
+	 elseif menu_resultat == 1 then
+	    local r = yuiRand() % 5
+	    if r == 0 then
+	       end_tv_txt = "TV reportage:\nabout a child been abuse\n" ..
+		  "by his " .. hate_idx_to_string(last_agresor) .. " parent"
+	    elseif r == 1 then
+	       end_tv_txt = "TV news:\nabout a group of\n" ..
+		  hate_idx_to_string(last_agresor) .. "\nwho create a reign of terror\n" ..
+		  "in they city"
+	    elseif r == 2 then
+	       end_tv_txt = "Politicals talk:\nsomeone theorise that\n" ..
+		  hate_idx_to_string(last_agresor) .. "\nare replacing the cultur of our contry"
+	    elseif r == 3 then
+	       end_tv_txt = "TV news: some\n" ..
+		  hate_idx_to_string(last_agresor) .. "\nare trying to replace very famous\nwork of art\nbecause they find it offensive"
+	    else
+	       end_tv_txt = "TV reportage:\babout a " ..
+		  hate_idx_to_string(last_agresor) .. "\nwinning a competition\n" ..
+		  "due to genetic advatage"
+	    end
+	 elseif menu_resultat == 2 then
+	    big_consume = big_consume + 2
+	    hates_array[BIG_HATE] = hates_array[BIG_HATE] + 20
+	    end_tv_txt = "BIG increase they share on root"
+	 elseif menu_resultat == 3 then
+	    small_triangle_consume = small_triangle_consume - 1
+	    small_i_triangle_consume = small_i_triangle_consume - 1
+	    square_consume = square_consume - 1
+	    end_tv_txt = "SMALL increase they share on root"
+	    hates_array[BIG_HATE] = hates_array[BIG_HATE] + 20
+	 end
+	 local target_hate = yuiRand() % compute_total_hate(hates_array)
+	 last_agresor = yuiRand() % 5 + 1
+	 local tot_v = 0
+	 local target = 0
+	 for i,v in ipairs(hates_array) do
+	    tot_v = tot_v + v
+	    if target_hate < tot_v then
+	       target = i
+	       break
+	    end
+	 end
+	 local nb_dmg = 1 + yuiRand() % 20
+	 bar_dec_from_hateidx(wid, target, nb_dmg)
+	 end_tv_txt = end_tv_txt .. "\n" .. hate_idx_to_string(last_agresor) ..
+	    "\ncommit crime against\n" .. hate_idx_to_string(target)
+	 end_info_txt = end_info_txt .. "\n" .. hate_idx_to_string(target) .. " recive\n" ..
+	    nb_dmg .. " dmg"
+	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y - 10, 15, end_tv_txt)
+	 mk_timed_txt(wid, "dmg-txt", TV_TXT_X + 280, TV_TXT_Y, 15, end_info_txt, "rgba: 255 0 0 255")
       else
 	 return
       end
@@ -313,7 +390,8 @@ function dsr_Action(wid, eves)
       print("NEW ACTION")
       if turn_cnt > 30 then
 	 turn_cnt = turn_cnt + 1
-	 mk_menu(wid, {"try to reduce BIG hatred", "reuse last events: present " .. hate_idx_to_string(last_agresor) .. " as dangerous for socity"})
+	 mk_menu(wid, {"try to reduce BIG hatred", "reuse last events: present " .. hate_idx_to_string(last_agresor) .. " as dangerous for socity", "increase BIG root share",
+	 "decrease smal share"})
       elseif turn_cnt == 15 then
 	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 14,
 		      "NEW LAW\ndecrase SR access to triangles"..
@@ -328,8 +406,8 @@ function dsr_Action(wid, eves)
 	 while src == target do
 	    src = yuiRand() % 5 + 1
 	 end
-	 local hate_atk = "an " .. hate_idx_to_string(src) .. "attack\nan" .. hate_idx_to_string(target) .. "\nout of pure hate"
-	 local deal_txt = hate_idx_to_string(target) .. "recive 4 dmg"
+	 local hate_atk = "a " .. hate_idx_to_string(src) .. " attack\na " .. hate_idx_to_string(target) .. "\nout of pure hate"
+	 local deal_txt = hate_idx_to_string(target) .. " recive 4 dmg"
 
 	 mk_timed_txt(wid, "tv-txt", TV_TXT_X, TV_TXT_Y, 15,
 		      "new big strike against\nTHE BIG !!!\n".. hate_atk)
@@ -370,6 +448,20 @@ function dsr_Action(wid, eves)
 
    score = score + big_consume
    print_all_npc(wid)
+   if turn_cnt == 1 then
+      y_stop_head(wid, 0, 0,
+		  "HELLO, and welcom to this very incomplet game\n"..
+		  "My goal was to make a game where you play\nsome ultra rich peoples (THE BIG)\n"..
+		  "You control TV, On the bottom of the screen, there is the\n" ..
+		  "root life, it's the life of the earth\n" ..
+		  "but also what every one need to live, and as sure\nevery one consume it\n" ..
+		  "you goal is to consume as much as posible of this energy\n" ..
+		  "while keeping other from consuming too much\nor earth will be dead\n"..
+		  "your weapon is to use TV to protect yourself\nfrom having everyone\n" ..
+		  "hating you, to do that\nyou must redirect peoples hate troward themself\n"..
+		  "so they leave you alone")
+   end
+
 end
 
 function dsr_init(wid)
@@ -463,26 +555,31 @@ function dsr_init(wid)
 			  Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "t_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "t_hp", 65, TV_BOTTOM, 200, 22, 100)
+   ywCanvasNewTextByStr(wid, 280, TV_BOTTOM, "< triangles")
 
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 30,
 			  Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "rt_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "rt_hp", 65, TV_BOTTOM + 30, 200, 22, 100)
+   ywCanvasNewTextByStr(wid, 280, TV_BOTTOM + 30, "< inv tri")
 
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 60,
 			  Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "t_w_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "tw_hp", 65, TV_BOTTOM + 60, 200, 22, 100)
+   ywCanvasNewTextByStr(wid, 280, TV_BOTTOM + 60, "< wrongly col")
 
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 90,
 			  Entity.new_string(TRIANGLE_PIXS),
 			  yeGet(wid, "rt_w_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "rtw_hp", 65, TV_BOTTOM + 90, 200, 22, 100)
+   ywCanvasNewTextByStr(wid, 280, TV_BOTTOM + 90, "< invert wrong")
 
    ywCanvasNewHeadacheImg(wid, 30, TV_BOTTOM + 120,
 			  Entity.new_string(SQUARE_PIXS),
 			  yeGet(wid, "t_info"))
    mk_bar(wid, "rgba: 255 255 100 200", "s_hp", 65, TV_BOTTOM + 120, 200, 22, 100)
+   ywCanvasNewTextByStr(wid, 280, TV_BOTTOM + 120, "< square")
 
    --ywCanvasNewTextByStr(wid, 30, TV_BOTTOM + 150, "<->")
    --mk_bar(wid, "rgba: 255 255 100 200", "c_hp", 65, TV_BOTTOM + 150, 200, 22, 100)
@@ -492,6 +589,7 @@ end
 function init_dsr(mod)
    mod = Entity.wrapp(mod)
    local init = Entity.new_array()
+   yePrint(mod["pre-load"])
 
    init.name = "depleted-square-root"
    init.callback = Entity.new_func(dsr_init)
